@@ -6,10 +6,17 @@
         "repo": "Justrebl/AI-SDLC-WKSDay"
       },
       "autoUpdate": true
+    },
+    "hve-core":{
+      "source": {
+        "source": "github",
+        "repo": "microsoft/hve-core"
+      },
+      "autoUpdate": true
     }
   },
   "enabledPlugins": {
-    "hve-core@contoso-plugin-marketplace": true,
+    "hve-core@hve-core": true,
     "java-development@contoso-plugin-marketplace": true
   }
 }
