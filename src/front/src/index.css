@@ -10,3 +10,8 @@ main {
   margin: 2rem auto;
   padding: 0 1rem;
 }
+
+button:focus-visible {
+  outline: 3px solid #0b5fff;
+  outline-offset: 2px;
+}
