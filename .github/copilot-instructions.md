@@ -21,3 +21,11 @@ This repository is a small mono-repo used in the *AI SDLC with Github Copilot an
 
 - API: `dotnet run --project src/api` · tests: `dotnet test`
 - Front: `npm install` then `npm run dev` · tests: `npm test` · build: `npm run build` (run from `src/front`)
+
+## Design Thinking
+
+- Design Thinking should always consider the following topics : Equivalent capabilities that we might have in the compan that would be better off extended rather than building from scratch a new feature or product. This is not a requirement, just something you make sure you ask.
+
+## External References
+
+All the Design Areas and Company best practices live in Confluence here : 
