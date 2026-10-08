@@ -1,13 +1,21 @@
 {
   "extraKnownMarketplaces": {
-    "hve-core":{
+    "contoso-plugin-marketplace": {
       "source": {
         "source": "github",
-        "repo": "microsoft/hve-core"
-      }
+        "repo": "Justrebl/AI-SDLC-WKSDay"
+      },
+      "autoUpdate": true
     }
   },
+  "strictKnownMarketplaces": [
+    {
+      "source": "github",
+      "repo": "Justrebl/AI-SDLC-WKSDay"
+    }
+  ],
   "enabledPlugins": {
-    "hve-core@hve-core": true
+    "hve-core@contoso-plugin-marketplace": true,
+    "java-development@contoso-plugin-marketplace": true
   }
 }
