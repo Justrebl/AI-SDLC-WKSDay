@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type Track = {
   id: number;
@@ -9,12 +9,14 @@ type Track = {
 };
 
 const DUPLICATE_MESSAGE = 'This track is already in your playlist.';
+const MESSAGE_DURATION_MS = 5000;
 
 export default function App() {
   const [tracks, setTracks] = useState<Track[] | null>(null);
   const [playlist, setPlaylist] = useState<Track[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [addMessage, setAddMessage] = useState<string | null>(null);
+  const messageTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const load = async (url: string) => {
@@ -28,9 +30,21 @@ export default function App() {
         setPlaylist(p);
       })
       .catch((err: Error) => setError(err.message));
+    return () => {
+      if (messageTimeout.current !== null) clearTimeout(messageTimeout.current);
+    };
   }, []);
 
+  function showAddMessage(message: string) {
+    setAddMessage(message);
+    messageTimeout.current = setTimeout(() => {
+      setAddMessage(null);
+      messageTimeout.current = null;
+    }, MESSAGE_DURATION_MS);
+  }
+
   async function addTrack(track: Track) {
+    if (messageTimeout.current !== null) clearTimeout(messageTimeout.current);
     setAddMessage(null);
     try {
       const res = await fetch('/api/playlist/tracks', {
@@ -39,15 +53,15 @@ export default function App() {
         body: JSON.stringify({ trackId: track.id }),
       });
       if (res.status === 409) {
-        setAddMessage(DUPLICATE_MESSAGE);
+        showAddMessage(DUPLICATE_MESSAGE);
       } else if (res.ok) {
         const added = (await res.json()) as Track;
         setPlaylist((current) => [...(current ?? []), added]);
       } else {
-        setAddMessage(`Could not add "${track.title}" (error ${res.status}).`);
+        showAddMessage(`Could not add "${track.title}" (error ${res.status}).`);
       }
     } catch {
-      setAddMessage(`Could not add "${track.title}".`);
+      showAddMessage(`Could not add "${track.title}".`);
     }
   }
 

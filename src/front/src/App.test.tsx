@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import App from './App';
 
 const tracks = [
@@ -51,15 +51,43 @@ describe('App', () => {
     expect(screen.queryByText(/Your playlist is empty/)).not.toBeInTheDocument();
   });
 
-  it('shows the duplicate message as an alert and re-announces a repeat', async () => {
-    stubApi((id) => (id === 1 ? 409 : 201));
+  it('shows a transient duplicate alert while keeping the Add button active', async () => {
+    const fetchMock = stubApi(409);
+    render(<App />);
+    const button = await screen.findByRole('button', { name: 'Add Midnight Static to playlist' });
+    vi.useFakeTimers();
+    try {
+      await act(async () => { fireEvent.click(button); });
+      expect(screen.getByRole('alert')).toHaveTextContent('This track is already in your playlist.');
+      expect(button).toBeEnabled();
+      expect(button).toHaveTextContent('Add Midnight Static to playlist');
+
+      await act(async () => { vi.advanceTimersByTime(4000); });
+      await act(async () => { fireEvent.click(button); });
+      expect(fetchMock.mock.calls.filter(([url]) => url === '/api/playlist/tracks')).toHaveLength(2);
+      await act(async () => { vi.advanceTimersByTime(4000); });
+      expect(screen.getByRole('alert')).toHaveTextContent('This track is already in your playlist.');
+      await act(async () => { vi.advanceTimersByTime(1000); });
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+      expect(screen.getByText(/Your playlist is empty/)).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('handles an unknown track id without breaking the catalog or playlist', async () => {
+    stubApi((id) => (id === 1 ? 404 : 201));
     render(<App />);
     const button = await screen.findByRole('button', { name: 'Add Midnight Static to playlist' });
     fireEvent.click(button);
-    expect(await screen.findByRole('alert')).toHaveTextContent('This track is already in your playlist.');
-    fireEvent.click(button);
-    expect(await screen.findByRole('alert')).toHaveTextContent('This track is already in your playlist.');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Could not add "Midnight Static" (error 404).');
+    expect(button).toBeEnabled();
+    const otherButton = screen.getByRole('button', { name: 'Add Green Pipeline to playlist' });
+    expect(otherButton).toBeEnabled();
     expect(screen.getByText(/Your playlist is empty/)).toBeInTheDocument();
+    fireEvent.click(otherButton);
+    expect(within(await screen.findByRole('list', { name: 'Playlist tracks' })).getByText(/Green Pipeline/)).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
   it('shows an alert when the API cannot be reached', async () => {
