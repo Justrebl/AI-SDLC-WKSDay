@@ -8,12 +8,6 @@
       "autoUpdate": true
     }
   },
-  "strictKnownMarketplaces": [
-    {
-      "source": "github",
-      "repo": "Justrebl/AI-SDLC-WKSDay"
-    }
-  ],
   "enabledPlugins": {
     "hve-core@contoso-plugin-marketplace": true,
     "java-development@contoso-plugin-marketplace": true
